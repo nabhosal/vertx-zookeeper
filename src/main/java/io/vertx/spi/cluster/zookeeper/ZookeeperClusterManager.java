@@ -52,10 +52,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -86,6 +86,7 @@ public class ZookeeperClusterManager implements ClusterManager, PathChildrenCach
   private static final String DEFAULT_CONFIG_FILE = "default-zookeeper.json";
   private static final String CONFIG_FILE = "zookeeper.json";
   private static final String ZK_SYS_CONFIG_KEY = "vertx.zookeeper.config";
+  private static final String ZK_UNIQUE_NODE_PREFIX="vertx.zookeeper.node.prefix";
   private JsonObject conf = new JsonObject();
 
   private static final String ZK_PATH_LOCKS = "/locks/";
@@ -96,6 +97,7 @@ public class ZookeeperClusterManager implements ClusterManager, PathChildrenCach
 
   public ZookeeperClusterManager() {
     String resourceLocation = System.getProperty(ZK_SYS_CONFIG_KEY, CONFIG_FILE);
+    this.nodeID = getIntuitiveNodeID();
     loadProperties(resourceLocation);
   }
 
@@ -117,6 +119,7 @@ public class ZookeeperClusterManager implements ClusterManager, PathChildrenCach
 
   public ZookeeperClusterManager(JsonObject config) {
     this.conf = config;
+    this.nodeID = getIntuitiveNodeID();
   }
 
   //just for unit testing
@@ -125,8 +128,29 @@ public class ZookeeperClusterManager implements ClusterManager, PathChildrenCach
     Objects.requireNonNull(curator, "The Curator instance cannot be null.");
     this.retryPolicy = retryPolicy;
     this.curator = curator;
-    this.nodeID = UUID.randomUUID().toString();
+    this.nodeID = getIntuitiveNodeID();
     this.customCuratorCluster = true;
+  }
+
+  /**
+   * Generate intuitive node id, using instance ip, service name & random suffix
+   * Dev-ops get ability to restart the service identifiable through just nodeId
+   * @return intuitiveNodeId
+   */
+  private String getIntuitiveNodeID(){
+
+    InetAddress inetAddress = null;
+    try {
+      inetAddress = InetAddress.getLocalHost();
+    } catch (UnknownHostException e) {
+      e.printStackTrace();
+    }
+
+    Random random = new Random(Instant.now().toEpochMilli());
+    String nodePrefix = System.getProperty(ZK_UNIQUE_NODE_PREFIX, "");
+    String uniqueNode = (!"".equalsIgnoreCase(nodePrefix) ? nodePrefix+"_" : "" ) + inetAddress.getHostAddress()+"_"+""+random.nextInt(1000);
+
+    return uniqueNode;
   }
 
   private void loadProperties(String resourceLocation) {
@@ -345,7 +369,10 @@ public class ZookeeperClusterManager implements ClusterManager, PathChildrenCach
             }
           }
         }
-        nodeID = UUID.randomUUID().toString();
+//        nodeID = UUID.randomUUID().toString();
+        if (nodeID == null)
+          nodeID = getIntuitiveNodeID();
+
         try {
           addLocalNodeID();
           future.complete();

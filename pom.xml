@@ -41,18 +41,21 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
-      <scope>provided</scope>
+      <!--<scope>provided</scope>-->
+      <version>4.0.0-milestone2</version>
     </dependency>
 
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-docgen</artifactId>
-      <scope>provided</scope>
+      <!--<scope>provided</scope>-->
+      <version>3.5.1</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-codetrans</artifactId>
-      <scope>provided</scope>
+      <!--<scope>provided</scope>-->
+      <version>4.0.0-milestone2</version>
     </dependency>
 
     <dependency>
@@ -146,16 +149,18 @@
       <artifactId>vertx-core</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
+      <version>3.6.2</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
       <scope>test</scope>
+      <version>3.4.2</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
-      <version>${project.version}</version>
+      <version>3.4.2</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
