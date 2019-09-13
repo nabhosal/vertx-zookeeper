@@ -4,4 +4,29 @@ This is a cluster manager implementation for Vert.x that uses http://zookeeper.a
 
 Please see the main documentation on the web-site for a full description:
 
+
 * https://vertx.io/docs/vertx-zookeeper/java/[Web-site documentation]
+
+= Why this Fork
+
+We are using zookeeper to manage vertx cluster, with multiple or replica services running across different machines.
+it was becoming challenging for dev-ops to pinpoint the down service since UUID in zk was not intuitive.
+We use zk watcher to automate restart of down service, and it need more info such as instance ip & service name.
+We have modified ZookeeperClusterManager for this purpose.
+
+Refer code
+link:src/test/java/io/vertx/nabhosal/custom/zookeeper/TestIntuitiveZKNodeID.java[TestIntuitiveZKNodeID.java]
+
+.Intuitive nodeID in zookeeper instead of UUID
+[source,commandline]
+----
+nilesh@CVHYD084:~/zookeeper/apache-zookeeper-3.5.5-bin$ bin/zkCli.sh -server 127.0.0.1:2181
+/usr/bin/java
+Connecting to 127.0.0.1:2181
+[zk: 127.0.0.1:2181(CONNECTED) 32] ls /io.vertx/cluster/nodes
+[127.0.1.1_857]
+[zk: 127.0.0.1:2181(CONNECTED) 33] ls /io.vertx/cluster/nodes
+[127.0.1.1_857, servicePrefix_127.0.1.1_207]
+[zk: 127.0.0.1:2181(CONNECTED) 34]
+
+----
